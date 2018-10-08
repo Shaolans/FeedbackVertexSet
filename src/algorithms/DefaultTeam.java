@@ -7,19 +7,40 @@ public class DefaultTeam {
   Evaluation evaluator = new Evaluation();
   public ArrayList<Point> calculFVS(ArrayList<Point> points) {
 	  
-    ArrayList<Point> fvs = greedyAlgorithm(points);
-    fvs = localSearchFSV(points, fvs);
-    ArrayList<Point> tmp;
+    //ArrayList<Point> fvs = greedyAlgorithm(points);
+	ArrayList<Point> fvs, tmp;
+	fvs = greedyAlgorithmAlea(points);
+	for(int i = 0; i < 10000; i++) {
+		tmp = greedyAlgorithmAlea(points);
+		if(tmp.size() < fvs.size()) {
+			fvs = tmp;
+		}
+	}
+    fvs = localSearchFSV1(points, fvs);
+
     boolean change = true;
 
     while(change) {
     	change = false;
-    	tmp = localSearchFSV(points, fvs);
+    	tmp = localSearchFSV1(points, fvs);
     	if(tmp.size() < fvs.size()) {
     		fvs = tmp;
     		change = true;
     	}
-    	System.out.println("LA");
+    	
+    }
+    
+    
+    fvs = localSearchFSV2(points, fvs);
+    change = true;
+
+    while(change) {
+    	change = false;
+    	tmp = localSearchFSV2(points, fvs);
+    	if(tmp.size() < fvs.size()) {
+    		fvs = tmp;
+    		change = true;
+    	}
     	
     }
     return fvs;
@@ -33,6 +54,27 @@ public class DefaultTeam {
 		  set.add(result.remove(maxNeighbor(result)));
 	  }
 	  return set;
+  }
+  
+  
+  
+  public ArrayList<Point> greedyAlgorithmAlea(ArrayList<Point> points){
+	  ArrayList<Point> set = new ArrayList<Point>();
+	  ArrayList<Point> result = new ArrayList<Point>(points);
+	  while(!evaluator.isValide(points, set)) {
+		  set.add(result.remove(randomSelect(result)));
+	  }
+	  return set;
+  }
+  
+  public int randomSelect(ArrayList<Point> points) {
+	  int max =  maxNeighbor(points);
+	  if(Math.random() < 0.9) {
+		  return max;
+	  }
+	  ArrayList<Point> copy = new ArrayList<>(points);
+	  copy.remove(max);
+	  return maxNeighbor(copy);
   }
   
   public int maxNeighbor(ArrayList<Point> points) {
@@ -49,10 +91,20 @@ public class DefaultTeam {
 	  return max;
   }
   
-  public ArrayList<Point> localSearchFSV(ArrayList<Point> points, ArrayList<Point> fsv){
+  public ArrayList<Point> localSearchFSV1(ArrayList<Point> points, ArrayList<Point> fsv){
 	  for(int i = 0; i < fsv.size(); i++) {
-		  for(int j = 0; j < fsv.size(); j++) {
-			  if(i == j) continue;
+		  ArrayList<Point> tmpfsv = new ArrayList<>(fsv);
+		  tmpfsv.remove(fsv.get(i));
+		  if(evaluator.isValide(points, tmpfsv)) return tmpfsv;
+	  }
+	  return fsv;
+  }
+  
+  
+  
+  public ArrayList<Point> localSearchFSV2(ArrayList<Point> points, ArrayList<Point> fsv){
+	  for(int i = 0; i < fsv.size(); i++) {
+		  for(int j = i+1; j < fsv.size(); j++) {
 			  for(int k = 0; k < points.size(); k++) {
 				  if(points.get(k) == fsv.get(j) || points.get(k) == fsv.get(i)) continue;
 				  ArrayList<Point> tmpfsv = new ArrayList<>(fsv);
