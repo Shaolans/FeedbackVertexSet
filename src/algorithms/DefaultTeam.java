@@ -69,7 +69,7 @@ public class DefaultTeam {
   
   public int randomSelect(ArrayList<Point> points) {
 	  int max =  maxNeighbor(points);
-	  if(Math.random() < 0.9) {
+	  if(Math.random() < 0.90) {
 		  return max;
 	  }
 	  ArrayList<Point> copy = new ArrayList<>(points);
